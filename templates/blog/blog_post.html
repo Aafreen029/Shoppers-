@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="container my-3">
+<div class="blog-post">
+  <h2 class="blog-post-title">{{Post.title}}</h2>
+  <div class="col-auto d-none d-lg-block ">
+    {% if Post.thumbnail %}
+    <img src="{{Post.thumbnail.url }}" class="bd-placeholder-img" width="200" height="250" alt="Post Image">
+    {% else %}
+    <div class="bd-placeholder-img bg-light d flex align-items-center justify-content-center" style="width:200px; height: 250ox;">
+      <span cass=" text-muted">No Image</span>
+    </div>
+    {% endif %}
+  </div>
+  <p class="blog-post-meta"></p>
+  <p>{{Post.description}}</p>
+</div>
+</div>
+<hr>
+<section>
+  <div class="container my-3 ">
+    <h2 class="text-center"> Recent Products</h2>
+    <hr>
+    <div class="row ">
+      {% for Post in recent_posts %}
+      <div class="col-md-4 mt-3">
+        <div class="card" style="width: 18rem;">
+          <a href="{% url 'blog_post' Post.title %}" style="text-decoration:none;">
+          {% if Post.thumbnail %}
+          <img src="{{ Post.thumbnail.url }}" class="card-img-top" alt=""style=" height:200px;">
+          {% else %}
+          <div class="bd-placeholder-img bg-light d-flex align-items-center justify-content-center" >
+            <span class="text-muted">No Image</span>
+          </div>
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title" style="color:black;">{{ Post.title }}</h5>
+            <p class="card-text" style="color:black;">{{ Post.description|truncatechars:50 }}</p>
+            <div class="d-flex gap-2">
+              <a href="{% url 'blog_post' Post.title %}" class="btn btn-sm btn-primary mb-1">See More</a>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
