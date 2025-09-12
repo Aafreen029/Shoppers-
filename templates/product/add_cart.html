@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block body %}
+
+<section class="section-content padding-y bg">
+	<form style="display: none;">
+    {% csrf_token %}
+	</form>
+	<div class="container">
+		{% if not cart_items %}
+		<h2 class="text-center">Your Shopping Cart is Empty <i class='fas fa-frown'></i></h2><br>
+		{%else %}
+		<div class="row">
+			<h2 class="text-center">Great Choice <i class="fa-solid fa-hands-clapping"></i></h2><br>
+			<aside class="col-lg-9">
+				<div class="card">
+					<table class="table table-borderless table-shopping-cart">
+						<thead class="text-muted">
+							<tr class="small text-uppercase">
+								<th scope="col">Product</th>
+  								<th scope="col" width="120">Quantity</th>
+  								<th scope="col" width="120">Price</th>
+  								<th scope="col" class="text-right" width="200"> </th>
+							</tr>
+						</thead>
+						<tbody>
+							
+							{% if cart_items %}
+							{%for cart_item in cart_items %}
+											<tr {% if not forloop.last %} style="border-bottom: 1px solid #dee2e6;"{% endif %}>
+								<td>
+									<figure class="itemside align-items-center">
+										<div class="aside me-3">
+											<a href="{% url 'product_details' cart_item.product_id.slug %}" class="title text-dark" style="text-decoration: none;">{{ cart_item.product_id.product_name }}</a>
+    									</div>
+										<figcaption class="info d-flex align-items-center">
+											<a href="{% url 'product_details' cart_item.product_id.slug %}">
+												<img src="{{ cart_item.product_id.thumbnail.url }}" class="img-sm" width="90" height="90">
+        									</a>
+											<div class="ms-3 d-flex flex-column">
+												<span class="badge bg-light text-dark border mb-1">
+													Size: {{ cart_item.selected_size.product_size }}
+												</span>
+												<span class="badge bg-light text-dark border">
+													Colour: {{ cart_item.selected_colour.colour_name }}
+												</span>
+											</div>
+										</figcaption>
+									</figure>
+								</td>
+								<td>
+									<div class="quantity"
+     data-product-id="{{ cart_item.product_id.id }}"
+     data-size-id="{{ cart_item.selected_size.id }}"
+     data-colour-id="{{ cart_item.selected_colour.id }}">
+  <button type="button" class="minus" aria-label="Decrease">&minus;</button>
+  <input type="number"
+         class="input-box"
+         value="{{ cart_item.quantity }}"
+         min="1" max="10"
+         readonly>
+  <button type="button" class="plus" aria-label="Increase">&plus;</button>
+</div>
+
+									<!-- col.// -->
+								</td>
+								
+								<td>
+  <div class="price-wrap">
+    {% if cart_item.product_id.discount_price %}
+      <var class="price text-success">&#x20B9;{{ cart_item.product_id.discount_price }}</var><br>
+      <small class="text-muted" style="text-decoration: line-through;">
+        &#x20B9;{{ cart_item.product_id.product_price }}
+      </small>
+    {% else %}
+      <var class="price">&#x20B9;{{ cart_item.product_id.product_price }}</var>
+    {% endif %}
+  </div>
+</td>
+
+								<td class="text-right">
+									<ul class="navbar-nav ms-auto d-flex align-items-center">
+										<li class="nav-item">
+											<a href="{% url 'remove_cart' cart_item.product_id.id %}" class="btn btn-danger"><i class="fa fa-trash" aria-hidden="true"></i> Remove</a>
+										</li>
+								</td>
+							</tr>
+							
+							{% endfor %}
+							{% endif %}
+							
+						</tbody>
+					</table>
+				</div> <!-- card.// -->
+			</aside> <!-- col.// -->
+			<aside class="col-lg-3">
+				<div class="card">
+					<div class="card-body">
+						<dl class="dlist-align">
+							<dt>Total price:</dt>
+							<dd class="text-right">&#x20B9; <span id="total-price">{{ total_price }}</span></dd>
+						</dl>
+						<dl class="dlist-align">
+    						<dt>shipping charge:</dt>
+    						<dd class="text-right">&#x20B9; <span id="shipping_charge">{{ shipping_charge }}</span></dd>
+						</dl>
+						<dl class="dlist-align">
+    						<dt>Grand Total:</dt>
+    						<dd class="text-right text-dark b"><strong>&#x20B9; <span id="grand-total">{{ grand_total }}</span></strong></dd>
+						</dl>
+						<hr>
+						<p class="text-center mb-3">
+							<img src="/media/upload/payment_image.png" height="80" alt="payment methods">
+						</p>
+						<a href="{% url 'checkout' %}" class="btn btn-outline-dark">Check Out <i class='fas fa-shopping-basket'></i></a>
+					</div> <!-- card-body.// -->
+				</div> <!-- card.// -->
+			</aside> <!-- col.// -->
+		</div> <!-- row.// -->
+		
+<!-- ============================ COMPONENT 1 END .// ================================= -->
+{% endif %}
+</div> <!-- container .//  -->
+</section>
+
+<!-- ========================= SECTION CONTENT END// ========================= -->
+{% endblock %}

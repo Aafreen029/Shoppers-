@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body %}
+<section class="section-content padding-y bg">
+  <div class="container">
+    <div class="row">
+
+      
+      <aside class="col-lg-6">
+        <div class="card">
+          <div class="card-body">
+            <h4 class="card-title mb-4">Delivery Address <i class="fa-solid fa-truck-fast"></i></h4>
+
+            {% if not new_address %}
+              {% if addresses_to_show %}
+                {% for address in addresses_to_show %}
+                  <div class="border p-3 rounded bg-light mb-3 position-relative address-block">
+                    <p><strong>{{ address.first_name }} {{ address.last_name }}</strong></p>
+                    <p>{{ address.email }} | {{ address.phone }}</p>
+                    <p>{{ address.address_line_1 }}</p>
+                    {% if address.address_line_2 %}
+                      <p>{{ address.address_line_2 }}</p>
+                    {% endif %}
+                    <p>{{ address.city }} - {{ address.pincode }}</p>
+                    <p>{{ address.state }}, {{ address.country }}</p>
+
+                    
+                    
+                    <div class="form-check">
+  <form method="post" class="set-default-form">
+    {% csrf_token %}
+    <input type="hidden" name="set_default" value="true">
+    <input type="hidden" name="address_id" value="{{ address.id }}">
+    
+    <input class="form-check-input set-default-address" type="radio" name="default_address" data-address-id="{{ address.id }}"
+           {% if address.default %}checked{% endif %}>
+    
+    <label class="form-check-label">
+      {% if address.default %}Default Address{% else %}Set as Default{% endif %}
+    </label>
+  </form>
+</div>
+
+
+                    
+                    <div class="d-flex justify-content-end gap-2 mt-2">
+                      <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="address_id" value="{{ address.id }}">
+                        <input type="hidden" name="delete_address" value="true">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                      </form>
+                      <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="edit_address_id" value="{{ address.id }}">
+                        <button type="submit" class="btn btn-warning btn-sm">Edit</button>
+                      </form>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% else %}
+                <p>No Default addresses saved yet.</p>
+              {% endif %}
+
+             
+              <form method="post" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="add_address" value="true">
+                <button type="submit" class="btn btn-outline-dark mt-3"> Add New Address</button>
+              </form>
+
+              <form method="post" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="change_address" value="true">
+                <button type="submit" class="btn btn-outline-dark mt-3">Change Address</button>
+              </form>
+
+            {% else %}
+              
+              <form method="post">
+                {% csrf_token %}
+                {% if address_to_edit %}
+                  <input type="hidden" name="address_id" value="{{ address_to_edit.id }}">
+                {% endif %}
+
+                <div class="form-group row">
+                  <div class="col">
+                    <label>First Name</label>
+                    <input type="text" name="first_name" class="form-control" required
+                      value="{{ address_to_edit.first_name|default_if_none:'' }}">
+                  </div>
+                  <div class="col">
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" class="form-control" required
+                      value="{{ address_to_edit.last_name|default_if_none:'' }}">
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <div class="col">
+                    <label>Email</label>
+                    <input type="email" name="email" class="form-control" required
+                      value="{{ address_to_edit.email|default_if_none:'' }}">
+                  </div>
+                  <div class="col">
+                    <label>Phone Number</label>
+                    <input type="text" name="phone" class="form-control" required
+                      value="{{ address_to_edit.phone|default_if_none:'' }}">
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <div class="col">
+                    <label>Address Line 1</label>
+                    <input type="text" name="address_line_1" class="form-control" required
+                      value="{{ address_to_edit.address_line_1|default_if_none:'' }}">
+                  </div>
+                  <div class="col">
+                    <label>Address Line 2</label>
+                    <input type="text" name="address_line_2" class="form-control"
+                      value="{{ address_to_edit.address_line_2|default_if_none:'' }}">
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <div class="col">
+                    <label>City</label>
+                    <input type="text" name="city" class="form-control" required
+                      value="{{ address_to_edit.city|default_if_none:'' }}">
+                  </div>
+                  <div class="col">
+                    <label>Pincode</label>
+                    <input type="text" name="pincode" class="form-control" required
+                      value="{{ address_to_edit.pincode|default_if_none:'' }}">
+                  </div>
+                </div>
+
+                <div class="form-group row mt-3">
+                  <div class="col">
+                    <label>State</label>
+                    <input type="text" name="state" class="form-control" required
+                      value="{{ address_to_edit.state|default_if_none:'' }}">
+                  </div>
+                  <div class="col">
+                    <label>Country</label>
+                    <input type="text" name="country" class="form-control" required
+                      value="{{ address_to_edit.country|default_if_none:'' }}">
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-outline-dark mt-3">Save Address</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      </aside>
+
+      
+      <aside class="col-lg-4">
+        <div class="card">
+          <div class="card-body">
+            <h4 class="card-title mb-4">Order Summary ({{total_items}} items)</h4>
+
+            <dl class="dlist-align">
+              <dt>Total price:</dt>
+              <dd class="text-right">&#x20B9; <span id="total-price">{{ total_price|floatformat:2  }}</span></dd>
+            </dl>
+            <dl class="dlist-align">
+              <dt>shipping charge:</dt>
+              <dd class="text-right">&#x20B9; <span id="shipping_charge">{{ shipping_charge|floatformat:2  }}</span></dd>
+            </dl>
+            <dl class="dlist-align">
+              <dt>Grand Total:</dt>
+              <dd class="text-right text-dark b">
+                <strong>&#x20B9; <span id="grand-total">{{ grand_total|floatformat:2  }}</span></strong>
+              </dd>
+            </dl>
+
+            <hr>
+            <p class="text-center mb-3">
+              <img src="/media/upload/payment_image.png" height="80" alt="payment methods">
+            </p>
+
+            <div class="d-flex">
+           
+              <!-- After Grand Total and payment method image -->
+               {% if addresses_to_show %}
+<button id="checkout-button" class="btn btn-dark w-100 mt-3"><i class="fa-solid fa-money-bill-transfer"></i>Pay Now </button>
+{% else %}
+  <button class="btn btn-secondary w-100 mt-3" disabled>Please add an address to proceed</button>
+{% endif %}
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+  const stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
+
+  document.getElementById("checkout-button").addEventListener("click", function () {
+    const isAuthenticated = "{{ request.user.is_authenticated|yesno:'true,false' }}";
+
+  if (isAuthenticated === "false") {
+    // Redirect guest users to login
+    window.location.href = "{% url 'login' %}?next={% url 'checkout' %}";
+    return;
+  }
+    fetch("{% url 'create_checkout_session' %}", {
+      method: "POST",
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+      },
+    })
+    .then(response => response.json())
+    .then(session => {
+      if (session.error) {
+        alert(session.error);
+      } else {
+        return stripe.redirectToCheckout({ sessionId: session.id });
+      }
+    })
+    .then(result => {
+      if (result.error) {
+        alert(result.error.message);
+      }
+    });
+  });
+</script>
+
+  
+
+
+
+
+
+            </div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</section>
+{% endblock %}

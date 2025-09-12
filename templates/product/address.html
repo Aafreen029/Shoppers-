@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% load static %}
+{% block body %}
+
+<meta name="csrf-token" content="{{ csrf_token }}">
+
+<section class="section-content padding-y bg">
+  <div class="container">
+    <div class="row">
+
+      <!-- Sidebar on the left -->
+     <aside class="col-md-3 text-center mb-3">
+       
+
+        <ul class="list-group">
+          <li class="list-group-item"> {% if address.profile_picture %}
+          <img src="{{ address.profile_picture.url }}" class="rounded-circle mb-2" style="width: 30px; height: 30px;">
+        {% else %}
+          <img src="/media/profile_pics/default_profile.png" class="rounded-circle mb-2" style="width: 30px; height: 30px;">
+        {% endif %}
+            Hi {{ address.first_name }} {{ address.last_name }}</li>
+          <a class="list-group-item {% if request.resolver_match.url_name == 'profile' %}{% endif %}" href="{% url 'profile' %}"><i class='fas fa-camera'></i> My Profile</a>
+          <a class="list-group-item" href="{% url 'order' %}"><i class="fa-solid fa-shopping-bag"></i> My Orders</a>
+          <a class="list-group-item active" href="{% url 'address' %}"><i class="fa fa-address-card" aria-hidden="true"></i> Manage Address</a>
+        </ul>
+      </aside>
+
+      <!-- Main content on the right -->
+      <div class="col-md-9">
+        <div class="card">
+          <div class="card-body">
+            {% if not new_address %}
+              {% for address in addresses %}
+                <div class="border p-3 rounded bg-light mb-3 position-relative">
+                  <p><strong>{{ address.first_name }} {{ address.last_name }}</strong></p>
+                  <p>{{ address.email }} | {{ address.phone }}</p>
+                  <p>{{ address.address_line_1 }}</p>
+                  {% if address.address_line_2 %}
+                    <p>{{ address.address_line_2 }}</p>
+                  {% endif %}
+                  <p>{{ address.city }} - {{ address.pincode }}</p>
+                  <p>{{ address.state }}, {{ address.country }}</p>
+                  
+                    <div class="form-check">
+                      <input class="form-check-input set-default-address" type="radio" name="default_address"data-address-id="{{ address.id }}" 
+                      {% if address.default %}checked{% endif %}>
+                      <label class="form-check-label">
+                        {% if address.default %}Default Address{% else %}Set as Default{% endif %}
+                      </label>
+                    </div>
+                 
+                  <div class="d-flex justify-content-end gap-2 mt-3">
+                    <form action="{% url 'delete_address' %}" method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="address_id" value="{{ address.id }}">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                    <form method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="edit_address_id" value="{{ address.id }}">
+                        <button type="submit" class="btn btn-warning btn-sm">Edit</button>
+                    </form>
+                </div>
+            </div>
+              {% empty %}
+                <p>No addresses saved yet.</p>
+              {% endfor %}
+
+              <form method="post" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="add_address" value="true">
+                <button type="submit" class="btn btn-outline-dark mt-3">Add New Address</button>
+              </form>
+            {% else %}
+              <form action="{% url 'address' %}" method="POST">
+                {% csrf_token %}
+                {% if address_to_edit %}
+                <input type="hidden" name="address_id" value="{{ address_to_edit.id }}">
+                {% endif %}
+                <div class="form-group">
+                  <div class="row">
+                    <div class="col">
+                      <label>First Name</label>
+                      <input type="text" name="first_name" class="form-control" required value="{{ address_to_edit.first_name|default_if_none:'' }}">
+                    </div>
+                    <div class="col">
+                      <label>Last Name</label>
+                      <input type="text" name="last_name" class="form-control" required value="{{ address_to_edit.last_name|default_if_none:'' }}">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <div class="row">
+                    <div class="col">
+                      <label>Email</label>
+                      <input type="email" name="email" class="form-control" required value="{{ address_to_edit.email|default_if_none:'' }}">
+                    </div>
+                    <div class="col">
+                      <label>Phone Number</label>
+                      <input type="text" name="phone" class="form-control" required value="{{ address_to_edit.phone|default_if_none:'' }}">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="col form-group">
+                    <label>Address Line 1</label>
+                    <input type="text" name="address_line_1" class="form-control" required value="{{ address_to_edit.address_line_1|default_if_none:'' }}">
+                  </div>
+                  <div class="col form-group">
+                    <label>Address Line 2</label>
+                    <input type="text" name="address_line_2" class="form-control">
+                  </div>
+                </div>
+
+                <div class="form-group mb-3">
+                  <div class="row">
+                    <div class="col">
+                      <label>City</label>
+                      <input type="text" name="city" class="form-control" required value="{{ address_to_edit.city|default_if_none:'' }}">
+                    </div>
+                    <div class="col">
+                      <label>Pincode</label>
+                      <input type="text" name="pincode" class="form-control" required value="{{ address_to_edit.pincode|default_if_none:'' }}">
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col">
+                      <label>State</label>
+                      <input type="text" name="state" class="form-control" required value="{{ address_to_edit.state|default_if_none:'' }}">
+                    </div>
+                    <div class="col">
+                      <label>Country</label>
+                      <input type="text" name="country" class="form-control" required value="{{ address_to_edit.country|default_if_none:'' }}">
+                    </div>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-outline-dark mt-3">Save Address</button>
+              </form>
+            {% endif %}
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}
