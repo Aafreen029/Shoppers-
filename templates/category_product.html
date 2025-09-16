@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load static %}
+{% block body %}
+
+<!-- 🧭 Horizontal Category Strip with Conditional Dropdown -->
+<style>
+  .category-tile {
+    position: relative;
+    min-width: 100px;
+    text-align: center;
+  }
+  .category-tile img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    padding: 8px;
+  }
+  .subcategory-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 1000;
+    display: none;
+    min-width: 150px;
+  }
+  .category-tile:hover .subcategory-dropdown {
+    display: block;
+  }
+  .subcategory-dropdown a {
+    display: block;
+    padding: 8px 12px;
+    text-decoration: none;
+    color: #333;
+    white-space: nowrap;
+  }
+  .subcategory-dropdown a:hover {
+    background-color: #f8f9fa;
+  }
+</style>
+<div class="container bg-dark py-1 border-bottom">
+  <div class="d-flex flex-wrap gap-4 justify-content-center align-items-center">
+    {% for cat in categories %}
+      <div class="category-tile">
+        <a href="{% url 'category_products' cat.slug %}" class="text-decoration-none text-white">
+          <div class="d-flex flex-column align-items-center">
+            <div class="rounded-circle bg-light d-flex justify-content-center align-items-center mb-2" style="width: 60px; height: 60px;">
+              {% if cat.cat_image %}
+                <img src="{{ cat.cat_image.url }}" alt="{{ cat.category_name }}">
+              {% else %}
+                <img src="{% static 'images/default-category.png' %}" alt="Default">
+              {% endif %}
+            </div>
+            <small class="fw-semibold">{{ cat.category_name }}</small>
+          </div>
+        </a>
+        {% if cat.subcategories.all %}
+        <div class="subcategory-dropdown">
+          {% for sub in cat.subcategories.all %}
+            <a href="{% url 'subcategory_products' sub.slug %}">{{ sub.subcategory_name }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="container py-5">
+  <h2 class="mb-4 text-center">{{ category.category_name }}</h2>
+  <div class="row">
+    {% for product in products %}
+      <div class="col-md-3 mb-4">
+        <a href="{% url 'product_details' product.slug %}" class="text-decoration-none text-dark">
+          <div class="card h-100">
+            <div class="card-img-top d-flex align-items-center justify-content-center" style="height:200px; background-color:#f8f9fa;">
+              {% if product.thumbnail %}
+                <img src="{{ product.thumbnail.url }}" alt="{{ product.product_name }}" style="max-height:100%; max-width:100%; object-fit:contain;">
+              {% else %}
+                <span class="text-muted">No Image</span>
+              {% endif %}
+            </div>
+            <div class="card-body">
+              <h6 class="fw-bold">{{ product.product_name }}</h6>
+              <p>&#8377;{{ product.discount_price|default:product.product_price }}</p>
+            </div>
+          </div>
+        </a>
+      </div>
+    {% empty %}
+      <p class="text-center">No products found in this category.</p>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock body %}
