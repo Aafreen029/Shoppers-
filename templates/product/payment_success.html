@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block body %}
+  <div class="container mt-5">
+    <div class="alert alert-success text-center">
+      <h4 class="alert-heading">Payment Successful <i class="fa-solid fa-check-circle"></i> </h4>
+      <p>Thank you for your order <i class='far fa-handshake'></i></p>
+      <a href="/" class="btn btn-dark mt-3">Go to Home <i class='fas fa-home'></i></a>
+      <a href="{% url 'order' %}" class="btn btn-dark mt-3">View Order <i class="fa-solid fa-shopping-bag"></i></a>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block body %}
+<div class="container my-5">
+
+  <!-- 🛒 Main Product Form Starts -->
+  <form method="post" action="{% url 'add_cart' prod_details.id %}">
+    {% csrf_token %}
+    <div class="row">
+      <div class="col-md-5">
+      <div class="d-flex gap-4 align-items-start">
+  <div class="image-container position-relative">
+    {% if prod_details.thumbnail %}
+      <img id="mainProductImage" src="{{ prod_details.thumbnail.url }}" alt="{{ prod_details.product_name }}" class="img-fluid">
+      <div id="lens" class="lens"></div>
+    {% else %}
+      <div class="bg-light d-flex align-items-center justify-content-center" style="height: 300px; width: 400px;">
+        <span class="text-muted">No Image Available</span>
+      </div>
+    {% endif %}
+  </div>
+  <div id="zoomResult" class="zoom-result d-none"></div>
+</div>
+
+
+        <div class="nav-item d-flex gap-2 mt-3">
+          <button type="submit" class="btn btn-outline-dark px-5" {% if prod_details.product_quantity == 0 %}disabled{% endif %}>
+            <i class='fas fa-cart-plus'></i> Add to Cart
+          </button>
+          <button type="submit" name="buy_now" value="true" class="btn btn-dark px-5" {% if prod_details.product_quantity == 0 %}disabled{% endif %}>
+            <i class="fa-solid fa-bag-shopping"></i> Buy Now
+          </button>
+        </div>
+
+        <!-- 🌟 Customer Reviews Section -->
+        <div class="card mt-4">
+          <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">Customer Reviews & Ratings <i class='fas fa-edit'></i></h5>
+          </div>
+          <div class="card-body">
+            {% if reviews %}
+            {% for review in reviews %}
+            <div class="mb-3 border-bottom pb-2">
+              {% if review.review %}
+              <p class="mb-0">{{ review.review }}</p>
+              {% endif %}
+              <div class="mb-1">
+                {% for i in "12345" %}
+                {% if forloop.counter <= review.rating %}
+                <span style="color: gold;">★</span>
+                {% else %}
+                <span style="color: lightgray;">★</span>
+                {% endif %}
+                {% endfor %}
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                By: {{ review.address.first_name }} {{ review.address.last_name }}
+              </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="text-muted">No reviews yet. Be the first to review this product.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-7">
+        <h2>{{ prod_details.product_name }}</h2>
+        {% if prod_details.discount_price %}
+        <h5 style="color:black;">
+          <span style="text-decoration: line-through; color: gray;">&#x20B9; {{ prod_details.product_price }}</span>
+          <span class="text-success">&#x20B9;{{ prod_details.discount_price }}</span>
+        </h5>
+        {% else %}
+        <h5 style="color:black;">&#x20B9;{{ prod_details.product_price }}</h5>
+        {% endif %}
+        <p>{{ prod_details.description }}</p>
+        {% if prod_details.product_quantity > 0 %}
+        <p style="font-size:26px;" class="text-success"><i class="fa-solid fa-inbox"></i> In-stock</p>
+        {% else %}
+        <p style="font-size:26px;" class="text-danger"><i class='fas fa-store-slash'></i> Out of stock</p>
+        {% endif %}
+
+        <!-- 👕 Size & Colour Selection -->
+        <div class="row mt-4">
+          {% if all_sizes %}
+          <div class="col-md-6 mb-3">
+            <label for="sizeSelect" class="form-label">Size</label>
+            <select name="size_id" required id="sizeSelect" class="form-select">
+              <option value="" disabled selected>Select Size</option>
+              {% for size in all_sizes %}
+              <option value="{{ size.id }}">{{ size.product_size }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+          {% if all_colours %}
+          <div class="col-md-6 mb-3">
+            <label for="colorSelect" class="form-label">Colour</label>
+            <select name="colour_id" required id="colourSelect" class="form-select">
+              <option value="" disabled selected>Select Colour</option>
+              {% for colour in all_colours %}
+              <option value="{{ colour.id }}">{{ colour.colour_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- 💰 Available Offers -->
+        <div class="card p-3 border-0 shadow-sm bg-light mt-3">
+          <h5 class="mb-3 text-primary"><i class="bi bi-tags-fill"></i> Available Offers</h5>
+          <ul class="list-unstyled">
+            <li>💳 Axis Bank Credit Card: 5% cashback up to ₹4,000 <a href="#">T&C</a></li>
+            <li>💳 SBI Debit Card: 5% cashback up to ₹750 <a href="#">T&C</a></li>
+            <li>🎁 Combo Offer: Buy 2 save 5%, Buy 3 save 7%, Buy 4+ save 10% <a href="#">T&C</a></li>
+            <li>🏷️ Special Price: Extra 33% off (inclusive) <a href="#">T&C</a></li>
+            <li>💰 Paytm UPI: ₹10 Instant Cashback on ₹500+ orders <a href="#">T&C</a></li>
+            <li>💳 Bank Offer: 5% cashback on Axis Bank Credit Card upto ₹4,000 per statement quarter <a href="#">T&C</a></li>
+            <li>💳 Bank Offer: 5% cashback on SBI Bank Debit Card up to ₹750 <a href="#">T&C</a></li>
+            <li>💳 Bank Offer: 10% off up to ₹1,500 on BOBCARD EMI Transactions of 6 months and above tenures, Min Txn Value: ₹7,500 <a href="#">T&C</a></li>
+            <li>💰 Bank Offer: Flat ₹10 Instant Cashback on Paytm UPI Trxns. Min Order Value ₹500. Valid once per Paytm account <a href="#">T&C</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </form>
+  <!-- 🛒 Main Product Form Ends -->
+
+
+   <!-- 🧠 Size Recommendation Form (Independent) -->
+
+  {% if prod_details.category_id.category_name == "Clothes" %}
+<div class="card mt-5 p-4">
+  <h5 class="mb-3">Get Your Recommended Size <i class="fas fa-ruler-combined"></i></h5>
+  <form method="POST" enctype="multipart/form-data" action="{% url 'recommend_size' prod_details.slug %}">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="userImage" class="form-label">Upload Full-Body Image</label>
+      <input type="file" name="user_image" id="userImage" accept="image/*" class="form-control " required>
+    </div>
+    <div class="mb-3">
+      <label for="userHeight" class="form-label">Enter Your Height (in cm)</label>
+      <input type="number" name="user_height" id="userHeight" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Get Size Recommendation</button>
+  </form>
+</div>
+{% if accuracy_score %}
+  <div class="alert alert-info mt-3">
+    <strong> Accuracy:</strong> {{ accuracy_score|floatformat:1 }}%
+   
+  </div>
+{% endif %}
+{% if recommended_size_top or recommended_size_bottom %}
+<div class="card mt-4 p-4 border-success">
+  <h5 class="text-success mb-3">Recommended Size</h5>
+  {% if recommended_size_top %}
+    <p><strong>Top Size:</strong> {{ recommended_size_top }}</p>
+  {% endif %}
+  {% if recommended_size_bottom %}
+    <p><strong>Bottom Size:</strong> {{ recommended_size_bottom }}</p>
+  {% endif %}
+  <small class="text-muted">Based on your uploaded image and height.</small>
+</div>
+{% endif %}
+{% endif %}
+
+    <!-- 🧡 Similar Products -->
+{% if similar_products %}
+<hr class="my-5">
+<h4 class="mb-4">You May Also Like <i class='fas fa-heart' style='color:red'></i></h4>
+<div class="d-flex flex-wrap gap-3 mb-5">
+  {% for prod in similar_products %}
+  <div class="card" style="width: 23%;">
+    <a href="{% url 'product_details' prod.slug %}" style="text-decoration: none; color: inherit;">
+      <div class="image-wrapper" style="height: 220px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+        {% if prod.thumbnail %}
+        <img src="{{ prod.thumbnail.url }}" alt="{{ prod.product_name }}" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+        {% else %}
+        <span class="text-muted">No Image</span>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <h6 class="fw-bold">{{ prod.product_name }}</h6>
+        {% if prod.discount_price %}
+        <p>
+          <span class="text-muted text-decoration-line-through">&#8377;{{ prod.product_price }}</span>
+          <span class="text-success">&#8377;{{ prod.discount_price }}</span>
+        </p>
+        {% else %}
+        <p class="text-dark">&#8377;{{ prod.product_price }}</p>
+        {% endif %}
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+  </div>
+{% endblock %}

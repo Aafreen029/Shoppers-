@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% load static %}
+{% block body %}
+<meta name="csrf-token" content="{{ csrf_token }}" />
+<section class="section-content padding-y bg">
+  <div class="container">
+    <div class="row">
+      <!-- Sidebar -->
+      <aside class="col-md-3 text-center mb-3">
+        <ul class="list-group">
+          <li class="list-group-item">
+            {% if address.profile_picture %}
+              <img src="{{ address.profile_picture.url }}" class="rounded-circle mb-2" style="width: 30px; height: 30px;">
+            {% else %}
+              <img src="/media/profile_pics/default_profile.png" class="rounded-circle mb-2" style="width: 30px; height: 30px;">
+            {% endif %}
+            Hi {{ address.first_name }} {{ address.last_name }}
+          </li>
+          <a class="list-group-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'profile' %}"><i class='fas fa-camera'></i> My Profile</a>
+          <a class="list-group-item active" href="{% url 'order' %}"><i class="fa-solid fa-shopping-bag"></i></i> My Orders</a>
+          <a class="list-group-item" href="{% url 'address' %}"><i class="fa fa-address-card" aria-hidden="true"></i> Manage Address</a>
+        </ul>
+      </aside>
+      <!-- Main content -->
+      <main class="col-md-9">
+        <h3 class="mb-4"><i class="fa-solid fa-shopping-bag"></i> My Orders</h3>
+        {% if grouped_orders %}
+          {% for order_id, orders in grouped_orders %}
+            <div class="card mb-4">
+              <div class="card-header bg-light">
+                <strong>Order ID:</strong> {{ order_id }} |
+                <strong>Ordered At:</strong> {{ orders.0.ordered_at|date:"d M Y, h:i A" }}
+              </div>
+              <div class="card-body p-0">
+                <table class="table table-striped mb-0">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>Product</th>
+                      <th>Quantity</th>
+                      <th>Total Amount</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for order in orders %}
+                      <tr>
+                        <td>
+                          <div class="d-flex align-items-center">
+                            {% if order.product.thumbnail %}
+                            <img src="{{ order.product.thumbnail.url }}" alt="{{ order.product.product_name }}" width="80" class="img-thumbnail me-3" />
+                            {% endif %}
+                            <div>
+                              <strong>{{ order.product.product_name }}</strong><br />
+                              <div class="mb-1">
+                                {% if order.selected_size %}
+          <span class="badge bg-light text-dark border me-2">Size: {{ order.selected_size.product_size }}</span>
+        {% endif %}
+        {% if order.selected_colour %}
+          <span class="badge bg-light text-dark border">Colour: {{ order.selected_colour.colour_name }}</span>
+        {% endif %}
+      </div>
+
+      {% if order.estimated_delivery_date and order.status != "Cancelled" and order.status != "Delivered" %}
+        <div>
+          <small class="text-muted">Estimated delivery: {{ order.estimated_delivery_date|date:"d M Y" }}</small>
+        </div>
+      {% endif %}
+      
+    </div>
+  </div>
+</td>
+
+                        <td>{{ order.quantity }}</td>
+                        <td>&#x20B9; {{ order.total_paid|floatformat:2 }}</td>
+                        <td>
+
+
+  {% if order.status == "Cancelled" %}
+    <span class="badge bg-danger">Cancelled</span><br>
+  {% elif order.status != "Delivered" %}
+<div class="delivery-tracker-horizontal">
+  <div class="step-horizontal {% if order.status in 'Pending Confirmed Shipped In Transit Delivered' %}active{% endif %}">
+    <div class="circle"><i class="fas fa-clock"></i></div>
+    <div class="label">Pending</div>
+  </div>
+
+  <div class="line-horizontal {% if order.status in 'Confirmed Shipped In Transit Delivered' %}active{% endif %}"></div>
+
+  <div class="step-horizontal {% if order.status in 'Confirmed Shipped In Transit Delivered' %}active{% endif %}">
+    <div class="circle"><i class="fas fa-check"></i></div>
+    <div class="label">Confirmed</div>
+  </div>
+
+  <div class="line-horizontal {% if order.status in 'Shipped In Transit Delivered' %}active{% endif %}"></div>
+
+  <div class="step-horizontal {% if order.status in 'Shipped In Transit Delivered' %}active{% endif %}">
+    <div class="circle"><i class="fas fa-truck"></i></div>
+    <div class="label">Shipped</div>
+  </div>
+
+  <div class="line-horizontal {% if order.status in 'In Transit Delivered' %}active{% endif %}"></div>
+
+  <div class="step-horizontal {% if order.status in 'In Transit Delivered' %}active{% endif %}">
+    <div class="circle"><i class="fas fa-shipping-fast"></i></div>
+    <div class="label">
+      In Transit
+      {% if order.status == 'In Transit' %}
+      <div class="extra-info">({{ order.delivery.current_city }})</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="line-horizontal {% if order.status == 'Delivered' %}active{% endif %}"></div>
+
+  <div class="step-horizontal {% if order.status == 'Delivered' %}active{% endif %}">
+    <div class="circle"><i class="fas fa-box"></i></div>
+    <div class="label">Delivered</div>
+  </div>
+</div>  
+
+ 
+     {% if order.status == 'Pending' %}
+  <!--div class="mt-2 text-center"-->
+    <div class="mt-2" style="margin-left: 0px; width: 80px;">
+
+    <form method="POST" action="{% url 'cancel_order' order.id %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this order?');">
+        Cancel
+      </button>
+    </form>
+  </div>
+{% endif %} 
+  {% endif %}
+   
+
+
+  {% if order.status == "Delivered" %}
+    <span class="badge bg-success">Delivered</span><br>
+    <small class="text-muted">Delivered on: {{ order.actual_delivery_date|date:"d M Y, h:i A" }}</small>
+  {% endif %}
+  <!-- Review section -->
+                          {% if order.status == 'Delivered' %}
+                            {% if not order.review_submitted %}
+                              <form action="{% url 'submit_review' %}" method="POST" class="mt-2">
+                                {% csrf_token %}
+                                <input type="hidden" name="product_id" value="{{ order.product.id }}">
+                                <input type="hidden" name="order_id" value="{{ order.id }}">
+                                <div class="star-rating">
+                                  {% for i in "54321" %}
+                                    <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}">
+                                    <label for="star{{ i }}" title="{{ i }} stars">★</label>
+                                  {% endfor %}
+                                </div>
+                                <input type="text" name="review" placeholder="Optional review" class="form-control my-2" />
+                                <button type="submit" class="btn btn-sm btn-outline-success">Submit Review</button>
+                              </form>
+                            {% else %}
+                              <div class="mt-2">
+                                <strong>Rating:</strong>
+                                {% for i in "12345" %}
+                                  {% if forloop.counter <= order.user_review.rating %}
+                                    <span style="color: gold;">★</span>
+                                  {% else %}
+                                    <span style="color: lightgray;">★</span>
+                                  {% endif %}
+                                {% endfor %}
+                                <br />
+                                {% if order.user_review.review %}
+                                  <strong>Review:</strong> "{{ order.user_review.review }}"
+                                {% else %}
+                                  <em>No written review provided.</em>
+                                {% endif %}
+                              </div>
+                              <button class="btn btn-sm btn-outline-primary mt-2" type="button" onclick="toggleEditForm('{{ order.id }}')">Edit Review</button>
+                              <form action="{% url 'submit_review' %}" method="POST" id="edit-form-{{ order.id }}" style="display: none;" class="mt-2">
+                                {% csrf_token %}
+                                <input type="hidden" name="product_id" value="{{ order.product.id }}">
+                                <input type="hidden" name="order_id" value="{{ order.id }}">
+                                <div class="star-rating">
+                                  {% for i in "54321" %}
+                                    <input type="radio" id="edit-star{{ i }}-{{ order.id }}" name="rating" value="{{ i }}"
+                                      {% if order.user_review.rating|stringformat:"s" == i %}checked{% endif %}>
+                                    <label for="edit-star{{ i }}-{{ order.id }}" title="{{ i }} stars">★</label>
+                                  {% endfor %}
+                                </div>
+                                <input type="text" name="review" class="form-control my-2" value="{{ order.user_review.review }}" />
+                                <button type="submit" class="btn btn-sm btn-outline-success">Update Review</button>
+                              </form>
+                            {% endif %}
+                          {% endif %}
+
+                      
+                         
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="alert alert-info text-center">
+            You haven't placed any orders yet.
+          </div>
+        {% endif %}
+      </main>
+    </div>
+  </div>
+</section>
+
+
+
+<script>
+  function toggleEditForm(orderId) {
+    const form = document.getElementById('edit-form-' + orderId);
+    if (form.style.display === "none") {
+      form.style.display = "block";
+    } else {
+      form.style.display = "none";
+    }
+  }
+</script>
+
+{% endblock %}

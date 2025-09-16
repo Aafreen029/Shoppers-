@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block body %}
+<section class="py-1">
+  <div class="container px-2 px-lg-5 mt-5">
+    <div class="row">
+      <div class="col-md-3">
+        <h4>Filters</h4>
+        <form method="get" id="filterForm">
+         {% if selected_category %}
+          <input type="hidden" name="category" id="categoryInput" value="{{ selected_category.category_name }}">
+          {% endif %}
+          {% if keyword %}
+          <input type="hidden" name="keyword" value="{{ keyword }}">
+          {% endif %}
+          <!-- Categories -->
+          <div class="mb-3">
+            <h6>Category</h6>
+            <!--ul class="list-group">
+              {% for cat in categories %}
+              <li class="list-group-item {% if selected_category and selected_category.category_name == cat.category_name %}{% endif %}">
+                {{ cat.category_name }}
+              </li>
+              {% endfor %}
+            </ul-->
+            <ul class="list-group">
+              {% for cat in categories %}
+              <li class="list-group-item" style="cursor: default;">
+                {{ cat.category_name }}
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+          <!--Price range-->
+          <div class="dual-slider-wrapper">
+  <h6>Price Range</h6>
+  <div class="slider-track" id="sliderTrack">
+    <div class="range-fill" id="rangeFill"></div>
+    <div class="thumb" id="thumbMin"></div>
+    <div class="thumb" id="thumbMax"></div>
+  </div>
+  <div class="price-values">
+    <span>Min: ₹<span id="minPriceVal">0</span></span>
+    <span>Max: ₹<span id="maxPriceVal">30000</span></span>
+  </div>
+  <input type="hidden" name="min_price" id="minPriceInput">
+  <input type="hidden" name="max_price" id="maxPriceInput">
+</div>
+
+          <!-- Brand Filter -->
+          <div class="mb-3">
+            <h6>Brand</h6>
+            <input type="text" class="form-control mb-2" placeholder="Search Brand" id="brandSearch">
+            <div style="max-height:150px; overflow-y:auto;">
+              {% for brand in brands %}
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="brand" value="{{ brand }}"
+                {% if brand in selected_brands %}checked{% endif %}>
+                <label class="form-check-label">{{ brand }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          <!-- Customer Rating -->
+          <div class="mb-3">
+            <h6>Customer Rating</h6>
+            {% for i in "43" %}
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="rating" value="{{ i }}"
+              {% if request.GET.rating == i %}checked{% endif %}>
+              <label class="form-check-label">
+                {{ i }}⭐ & above
+              </label>
+            </div>
+            {% endfor %}
+          </div>
+          <!-- Apply Filters -->
+           <button type="submit" class="btn btn-dark w-100">Apply Filters</button>
+          </form>
+        </div>
+        <!-- Main product area -->
+         <div class="col-md-9">
+          
+
+          {% if products %}
+          <h2 class="text mb-3">Product found ({{ product_count }})</h2><br>
+          <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+            {% for prod in products %}
+            <div class="col mb-5">
+              <div class="card h-100" style="width: 100%;">
+                <a href="{% url 'product_details' prod.slug %}" style="text-decoration: none; color: inherit;">
+                  <div class="image-wrapper" style="height: 220px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                    {% if prod.thumbnail %}
+                    <img src="{{ prod.thumbnail.url }}" alt="{{ prod.product_name }}" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                    {% else %}
+                    <span class="text-muted">No Image</span>
+                    {% endif %}
+                  </div>
+                  <div class="card-body">
+                    <h6 class="fw-bold">{{ prod.product_name }}</h6>
+                    {% if prod.discount_price %}
+                    <p>
+                      <span class="text-muted text-decoration-line-through">&#8377;{{ prod.product_price }}</span>
+                      <span class="text-success">&#8377;{{ prod.discount_price }}</span>
+                    </p>
+                    {% else %}
+                    <p class="text-dark">&#8377;{{ prod.product_price }}</p>
+                    {% endif %}
+                  </div>
+                </a>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <h2 class="text-danger text-center">No product found</h2>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+ <script>
+  const initialMin = {{ min_price|default:0 }};
+  const initialMax = {{ max_price|default:30000 }};
+</script>
+    {% endblock  %}
